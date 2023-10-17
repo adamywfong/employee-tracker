@@ -1,7 +1,7 @@
 const inquirer = require('inquirer');
 const mysql = require('mysql2');
 require('dotenv').config();
-const {viewer} = require('./queries');
+const {viewer, chooser, adder} = require('./queries');
 
 const db = mysql.createConnection({
   host: 'localhost',
@@ -10,10 +10,9 @@ const db = mysql.createConnection({
   // MySQL password
   password: process.env.DB_PASSWORD,
   database: process.env.DB_NAME
-  },
-  console.log('connected to server')
-);
+}).promise();
 
+// Displays list of options and executes functions based on response
 function optionSelect() {
   inquirer
     .prompt([
@@ -56,15 +55,15 @@ function optionSelect() {
             updateEmployeeRole();
             break;
           default:
-            console.log('hello');
             break;
         }
     })
     .catch((err) => console.log(err));
 }
 
-const viewDB = (database) => {
-  switch (database) {
+// Opens requested table
+const viewDB = (table) => {
+  switch (table) {
     case 'department':
       db.query(viewer.department,  (err,rows) => {
         if(err) throw err;
@@ -87,6 +86,34 @@ const viewDB = (database) => {
   optionSelect(); 
 }
 
+// Populates choices for inquirer prompts
+const choices = async (selection) => {
+  switch (selection) {
+    case 'department':
+      const departments = await db.query(chooser.department,  (err,rows) => {
+        if(err) throw err;
+      });
+      return departments[0];
+    case 'role' :
+      const roles = await db.query(chooser.role,  (err,rows) => {
+        if(err) throw err;
+      });
+      return roles[0];
+    case 'employee' :
+      const employees = await db.query(chooser.employee,  (err,rows) => {
+        if(err) throw err;
+      });
+      return employees[0]
+    case 'manager' :
+      const managers = await db.query(chooser.employee,  (err,rows) => {
+        if(err) throw err;
+      });
+      return managers[0].push({value: null, name: 'None'});
+    default:
+      break;
+  }
+}
+
 const addDepartment = () => {
   inquirer
     .prompt([
@@ -96,7 +123,7 @@ const addDepartment = () => {
         name: 'department'
       }
     ]).then((response) => {
-      db.query(`INSERT INTO department (name) VALUES (?);`, response.department,  (err,rows) => {
+      db.query(adder.department, response.department,  (err,rows) => {
         if(err) throw err;
         console.log(rows);
         optionSelect();
@@ -104,7 +131,7 @@ const addDepartment = () => {
     }).catch((err) => console.log(err));
 } 
 
-const addRole = () => {
+const addRole = async () => {
   inquirer
     .prompt([
       {
@@ -121,10 +148,10 @@ const addRole = () => {
         type: 'list',
         message: 'What department does this role belong to?',
         name: 'department',
-        choices: []
+        choices: await choices('department')
       }
     ]).then((response) => {
-      db.query(`INSERT INTO role (title,salary,department_id) VALUES (?, ?, ?);`, [response.title,response.salary,], (err,rows) => {
+      db.query(adder.role, [response.title,response.salary,response.department], (err,rows) => {
         if(err) throw err;
         console.log(rows);
         optionSelect();
@@ -132,7 +159,7 @@ const addRole = () => {
     }).catch((err) => console.log(err));
 }
 
-const addEmployee = () => {
+const addEmployee = async () => {
   inquirer
     .prompt([
       {
@@ -149,16 +176,16 @@ const addEmployee = () => {
         type: 'list',
         message: 'What is the employee\'s role?',
         name: 'role',
-        choices: []
+        choices: await choices('role')
       },
       {
         type: 'list',
         message: 'Who is the employee\'s manager(none if no manager)?',
         name: 'manager',
-        choices: []
+        choices: await choices('manager')
       }
     ]).then((response) => {
-      db.query(`INSERT INTO role (first_name,last_name,role_id,manager_id) VALUES ("?", "?", ?, ?);`,[response.firstName,response.lastName,,],  (err,rows) => {
+      db.query(adder.employee,[response.firstName,response.lastName,response.role,response.manager],  (err,rows) => {
         if(err) throw err;
         console.log(rows);
         optionSelect();
@@ -166,9 +193,28 @@ const addEmployee = () => {
     }).catch((err) => console.log(err));
 }
 
-const updateEmployeeRole = () => {
+const updateEmployeeRole = async () => {
   inquirer
-    .prompt
+    .prompt([
+      {
+        type: 'list',
+        message: 'Which employee are you updating?',
+        name: 'employee',
+        choices: await choices('employee')
+      },
+      {
+        type: 'list',
+        message: 'What role does this employee have?',
+        name: 'role',
+        choices: await choices('role')
+      },
+    ]).then((response) => {
+      db.query(`UPDATE employee SET role_id = ? WHERE id = ?;`, [response.role, response.employee],(err,rows) => {
+        if(err) throw err;
+        console.log(rows);
+        optionSelect();
+      })
+    })
 }
 
 optionSelect();
