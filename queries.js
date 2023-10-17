@@ -6,7 +6,17 @@ const viewer = {
     FROM employee emp
     JOIN role ON emp.role_id = role.id 
     JOIN department ON role.department_id = department.id
-    JOIN employee manager ON emp.manager_id = manager.id;`
+    JOIN employee manager ON emp.manager_id = manager.id;`,
+    manager: `SELECT employee.id, first_name, last_name, role.title, department.name AS department, role.salary
+    FROM employee
+    JOIN role ON employee.role_id = role.id
+    JOIN department ON role.department_id = department.id
+    WHERE manager_id = ?;`,
+    byDept: `SELECT emp.id, emp.first_name, emp.last_name, role.title, role.salary, CONCAT(manager.first_name, ' ', manager.last_name) AS manager
+    FROM employee emp
+    JOIN role ON emp.role_id = role.id
+    JOIN employee manager ON emp.manager_id = manager.id
+    WHERE role.department_id = ?;`
 }
 
 const chooser = {

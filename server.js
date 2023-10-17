@@ -62,6 +62,12 @@ function optionSelect() {
           case 'Update employee manager':
             updateEmployee('manager');
             break;
+          case 'View employees by manager':
+            viewDB('manager');
+            break;
+          case 'View employees by department':
+            viewDB('byDept');
+            break;
           default:
             break;
         }
@@ -76,17 +82,49 @@ const viewDB = async (table) => {
     case 'department':
       data = await db.query(viewer.department);
       console.log(data[0]);
+      optionSelect();
       break;
     case 'role':
       data = await db.query(viewer.role);
       console.log(data[0]);
+      optionSelect();
       break;
     case 'employee':
       data = await db.query(viewer.employee);
       console.log(data[0]);
+      optionSelect();
       break;
-  } 
-  optionSelect(); 
+    case 'manager':
+      inquirer
+        .prompt([
+          {
+            type: 'list',
+            message: 'Who is the manager?',
+            name: 'manager',
+            choices: await choices('employee')
+          }
+        ]).then(async (response) => {
+          data = await db.query(viewer.manager, response.manager);
+          console.log(data[0]);
+          optionSelect();
+        })
+      break;
+    case 'byDept':
+      inquirer
+        .prompt([
+          {
+            type: 'list',
+            message: 'Select a department:',
+            name: 'department',
+            choices: await choices('department')
+          }
+        ]).then(async (response) => {
+          data = await db.query(viewer.byDept, response.department);
+          console.log(data[0]);
+          optionSelect();
+        })
+      break;
+  }
 }
 
 // Populates choices for inquirer prompts
