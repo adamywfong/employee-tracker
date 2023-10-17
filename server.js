@@ -1,26 +1,25 @@
 const inquirer = require('inquirer');
-const mysql = require('mysql');
+const mysql = require('mysql2');
+require('dotenv').config();
 
-const PORT = process.env.PORT || 3001;
+const db = mysql.createConnection({
+  host: 'localhost',
+  // MySQL username,
+  user: process.env.DB_USER,
+  // MySQL password
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_NAME
+  },
+  console.log('connected to server')
+);
 
-const db = mysql.createConnection(
-    {
-      host: 'localhost',
-      // MySQL username,
-      user: process.env.DB_USER,
-      // MySQL password
-      password: process.env.DB_PASSWORD,
-      database: process.env.DB_NAME
-    },
-    console.log(`Connected to the database.`)
-  );
-
-const  optionSelect = () => {
+function optionSelect() {
   inquirer
-    .prompt({
+    .prompt([
+      {
       type: 'list',
       message: 'What would you like to do?',
-      name: 'choice',
+      name: 'option',
       choices: ['View all departments',
                 'View all roles',
                 'View all employees',
@@ -28,17 +27,20 @@ const  optionSelect = () => {
                 'Add a role',
                 'Add an employee',
                 'Update an employee role',
-                'Quit']
-    }).then((response) => {
-        switch (response.choice) {
+                'Quit'
+              ]
+      }
+  ])
+    .then((response) => {
+        switch (response.option) {
           case 'View all departments' :
-            viewDepartments();
+            viewDB('department');
             break;
-            case 'View all roles' :
-            viewRoles();
+          case 'View all roles' :
+            viewDB('role');
             break;
           case 'View all employees' :
-            viewEmployees();
+            viewDB('employee');
             break;
           case 'Add a department' :
             addDepartment();
@@ -53,13 +55,103 @@ const  optionSelect = () => {
             updateEmployeeRole();
             break;
           default:
+            console.log('hello');
             break;
         }
     })
+    .catch((err) => console.log(err));
 }
 
-function init() {
-  optionSelect();
+const viewDB = (database) => {
+  db.query(`SELECT * FROM ${database};`,  (err,rows) => {
+    if(err) throw err;
+    console.log(rows);
+    optionSelect();
+  })
 }
 
-init();
+const addDepartment = () => {
+  inquirer
+    .prompt([
+      {
+        type: 'text',
+        message: 'What is the name of the new department?',
+        name: 'department'
+      }
+    ]).then((response) => {
+      db.query(`INSERT INTO department (name) VALUES (?);`, response.department,  (err,rows) => {
+        if(err) throw err;
+        console.log(rows);
+        optionSelect();
+      })
+    }).catch((err) => console.log(err));
+} 
+
+const addRole = () => {
+  inquirer
+    .prompt([
+      {
+        type: 'text',
+        message: 'What is the title of the new role?',
+        name: 'title'
+      },
+      {
+        type: 'text',
+        message: 'What is the salary of the new role?',
+        name: 'salary'
+      },
+      {
+        type: 'list',
+        message: 'What department does this role belong to?',
+        name: 'department',
+        choices: []
+      }
+    ]).then((response) => {
+      db.query(`INSERT INTO role (title,salary,department_id) VALUES (?, ?, ?);`, [response.title,response.salary,], (err,rows) => {
+        if(err) throw err;
+        console.log(rows);
+        optionSelect();
+      })
+    }).catch((err) => console.log(err));
+}
+
+const addEmployee = () => {
+  inquirer
+    .prompt([
+      {
+        type: 'text',
+        message: "What is the employee's first name?",
+        name: 'firstName'
+      },
+      {
+        type: 'text',
+        message: "What is the employee's last name?",
+        name: 'lastName'
+      },
+      {
+        type: 'list',
+        message: 'What is the employee\'s role?',
+        name: 'role',
+        choices: []
+      },
+      {
+        type: 'list',
+        message: 'Who is the employee\'s manager(none if no manager)?',
+        name: 'manager',
+        choices: []
+      }
+    ]).then((response) => {
+      db.query(`INSERT INTO role (first_name,last_name,role_id,manager_id) VALUES ("?", "?", ?, ?);`,[response.firstName,response.lastName,,],  (err,rows) => {
+        if(err) throw err;
+        console.log(rows);
+        optionSelect();
+      })
+    }).catch((err) => console.log(err));
+}
+
+const updateEmployeeRole = () => {
+  inquirer
+    .prompt
+}
+
+optionSelect();
