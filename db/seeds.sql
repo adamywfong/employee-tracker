@@ -11,7 +11,7 @@ VALUES  ('CFO', 450000, 2),
         ('Hiring Manager', 80000, 1),
         ('Restructuring Analyst', 75000, 3),
         ('Funds Analyst', 47000, 2),
-        ('Payroll Clerk', 41000, 1)
+        ('Payroll Clerk', 41000, 1),
         ('Marketer', 45000, 3);
 
 INSERT INTO employee (first_name, last_name, role_id, manager_id)

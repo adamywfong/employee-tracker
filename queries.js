@@ -7,7 +7,13 @@ const viewer = {
 const chooser = {
     department: `SELECT id AS value, name FROM department`,
     role: `SELECT id AS value, title AS name FROM role`,
-    employee: `SELECT id AS value, first_name + ' ' + last_name AS name FROM employee`
+    employee: `SELECT id AS value, CONCAT(first_name, ' ', last_name) AS name FROM employee`
 }
 
-module.exports = {viewer, chooser};
+const adder = {
+    department: `INSERT INTO department (name) VALUES (?);`,
+    role: `INSERT INTO role (title,salary,department_id) VALUES (?, ?, ?);`,
+    employee: `INSERT INTO employee (first_name,last_name,role_id,manager_id) VALUES (?, ?, ?, ?);`
+}
+
+module.exports = {viewer, chooser, adder};

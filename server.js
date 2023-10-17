@@ -62,25 +62,20 @@ function optionSelect() {
 }
 
 // Opens requested table
-const viewDB = (table) => {
+const viewDB = async (table) => {
+  let data;
   switch (table) {
     case 'department':
-      db.query(viewer.department,  (err,rows) => {
-        if(err) throw err;
-        console.log(rows);
-      });
+      data = await db.query(viewer.department);
+      console.log(data[0]);
       break;
     case 'role':
-      db.query(viewer.role,  (err,rows) => {
-        if(err) throw err;
-        console.log(rows);
-      });
+      data = await db.query(viewer.role);
+      console.log(data[0]);
       break;
     case 'employee':
-      db.query(viewer.employee,  (err,rows) => {
-        if(err) throw err;
-        console.log(rows);
-      });
+      data = await db.query(viewer.employee);
+      console.log(data[0]);
       break;
   } 
   optionSelect(); 
@@ -88,27 +83,17 @@ const viewDB = (table) => {
 
 // Populates choices for inquirer prompts
 const choices = async (selection) => {
+  let data;
   switch (selection) {
     case 'department':
-      const departments = await db.query(chooser.department,  (err,rows) => {
-        if(err) throw err;
-      });
-      return departments[0];
+      data = await db.query(chooser.department);
+      return data[0];
     case 'role' :
-      const roles = await db.query(chooser.role,  (err,rows) => {
-        if(err) throw err;
-      });
-      return roles[0];
+      data = await db.query(chooser.role);
+      return data[0];
     case 'employee' :
-      const employees = await db.query(chooser.employee,  (err,rows) => {
-        if(err) throw err;
-      });
-      return employees[0]
-    case 'manager' :
-      const managers = await db.query(chooser.employee,  (err,rows) => {
-        if(err) throw err;
-      });
-      return managers[0].push({value: null, name: 'None'});
+      data = await db.query(chooser.employee);
+      return data[0];
     default:
       break;
   }
@@ -123,11 +108,8 @@ const addDepartment = () => {
         name: 'department'
       }
     ]).then((response) => {
-      db.query(adder.department, response.department,  (err,rows) => {
-        if(err) throw err;
-        console.log(rows);
-        optionSelect();
-      })
+      db.query(adder.department, response.department)
+      optionSelect();
     }).catch((err) => console.log(err));
 } 
 
@@ -151,15 +133,14 @@ const addRole = async () => {
         choices: await choices('department')
       }
     ]).then((response) => {
-      db.query(adder.role, [response.title,response.salary,response.department], (err,rows) => {
-        if(err) throw err;
-        console.log(rows);
-        optionSelect();
-      })
+      db.query(adder.role, [response.title,response.salary,response.department])
+      optionSelect();
     }).catch((err) => console.log(err));
 }
 
 const addEmployee = async () => {
+  const managers = await choices('employee');
+  managers.push({value: null, name: 'None'});
   inquirer
     .prompt([
       {
@@ -182,14 +163,12 @@ const addEmployee = async () => {
         type: 'list',
         message: 'Who is the employee\'s manager(none if no manager)?',
         name: 'manager',
-        choices: await choices('manager')
+        choices: managers
       }
     ]).then((response) => {
-      db.query(adder.employee,[response.firstName,response.lastName,response.role,response.manager],  (err,rows) => {
-        if(err) throw err;
-        console.log(rows);
-        optionSelect();
-      })
+      console.log(response);
+      db.query(adder.employee,[response.firstName,response.lastName,response.role,response.manager])
+      optionSelect();
     }).catch((err) => console.log(err));
 }
 
@@ -209,11 +188,8 @@ const updateEmployeeRole = async () => {
         choices: await choices('role')
       },
     ]).then((response) => {
-      db.query(`UPDATE employee SET role_id = ? WHERE id = ?;`, [response.role, response.employee],(err,rows) => {
-        if(err) throw err;
-        console.log(rows);
-        optionSelect();
-      })
+      db.query(`UPDATE employee SET role_id = ? WHERE id = ?;`, [response.role, response.employee])
+      optionSelect();
     })
 }
 
