@@ -1,6 +1,7 @@
 const inquirer = require('inquirer');
 const mysql = require('mysql2');
 require('dotenv').config();
+const {viewer} = require('./queries');
 
 const db = mysql.createConnection({
   host: 'localhost',
@@ -63,11 +64,27 @@ function optionSelect() {
 }
 
 const viewDB = (database) => {
-  db.query(`SELECT * FROM ${database};`,  (err,rows) => {
-    if(err) throw err;
-    console.log(rows);
-    optionSelect();
-  })
+  switch (database) {
+    case 'department':
+      db.query(viewer.department,  (err,rows) => {
+        if(err) throw err;
+        console.log(rows);
+      });
+      break;
+    case 'role':
+      db.query(viewer.role,  (err,rows) => {
+        if(err) throw err;
+        console.log(rows);
+      });
+      break;
+    case 'employee':
+      db.query(viewer.employee,  (err,rows) => {
+        if(err) throw err;
+        console.log(rows);
+      });
+      break;
+  } 
+  optionSelect(); 
 }
 
 const addDepartment = () => {

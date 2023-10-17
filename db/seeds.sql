@@ -15,9 +15,9 @@ VALUES  ('CFO', 450000, 2),
         ('Marketer', 45000, 3);
 
 INSERT INTO employee (first_name, last_name, role_id, manager_id)
-VALUES  ('John', 'Money', 1),
-        ('Robin', 'Hiring', 2),
-        ('Francis', "Operator", 3),
+VALUES  ('John', 'Money', 1, NULL),
+        ('Robin', 'Hiring', 2, NULL),
+        ('Francis', "Operator", 3, NULL),
         ('Susan', 'Accounting', 4, 1),
         ('William', 'Employer', 5, 2),
         ('Jenny', 'Paycheck', 8, 5),
