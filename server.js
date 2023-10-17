@@ -71,6 +71,9 @@ function optionSelect() {
           case 'Delete an entry':
             handleDelete();
             break;
+          case 'View budget by department':
+            viewDB('budget');
+            break;
           default:
             break;
         }
@@ -127,6 +130,21 @@ const viewDB = async (table) => {
           optionSelect();
         })
       break;
+    case 'budget':
+      inquirer
+        .prompt([
+          {
+            type: 'list',
+            message: 'Select a department:',
+            name: 'department',
+            choices: await choices('department')
+          }
+        ]).then(async (response) => {
+          data = await db.query(viewer.budget, response.department);
+          console.log(data[0]);
+          optionSelect();
+        });
+        break;
   }
 }
 

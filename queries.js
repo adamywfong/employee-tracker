@@ -16,7 +16,12 @@ const viewer = {
     FROM employee emp
     LEFT OUTER JOIN role ON emp.role_id = role.id
     LEFT OUTER JOIN employee manager ON emp.manager_id = manager.id
-    WHERE role.department_id = ?;`
+    WHERE role.department_id = ?;`,
+    budget: `SELECT SUM(ALL role.salary) AS Budget 
+    FROM employee
+    LEFT OUTER JOIN role ON employee.role_id = role.id
+    WHERE role.department_id = ?
+    `
 }
 
 const chooser = {
