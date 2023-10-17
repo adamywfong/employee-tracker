@@ -1,7 +1,7 @@
 const inquirer = require('inquirer');
 const mysql = require('mysql2');
 require('dotenv').config();
-const {viewer, chooser, adder} = require('./queries');
+const {viewer, chooser, adder, deleter} = require('./queries');
 
 const db = mysql.createConnection({
   host: 'localhost',
@@ -67,6 +67,9 @@ function optionSelect() {
             break;
           case 'View employees by department':
             viewDB('byDept');
+            break;
+          case 'Delete an entry':
+            handleDelete();
             break;
           default:
             break;
@@ -245,5 +248,31 @@ const updateEmployee = async (update) => {
     })
 }
 
+const handleDelete = async () => {
+  let table;
+  inquirer
+    .prompt([
+      {
+        type: 'list',
+        message: 'What would you like to delete?',
+        name: 'table',
+        choices: ['department', 'role', 'employee']
+      }
+    ]).then(async (response) => {
+      table = response.table;
+      inquirer
+        .prompt([
+          {
+            type: 'list',
+            message: `Select the ${table} to delete:`,
+            name: 'toDelete',
+            choices: await choices(table)
+          }
+        ]).then((res) => {
+          console.log(table + ' ' + res.toDelete);
+      db.query(`DELETE FROM ${table} WHERE id = ?;`, res.toDelete);
+      optionSelect();
+    })})
+}
 
 optionSelect();
