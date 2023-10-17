@@ -27,6 +27,11 @@ function optionSelect() {
                 'Add a role',
                 'Add an employee',
                 'Update an employee role',
+                'Update employee manager',
+                'View employees by manager',
+                'View employees by department',
+                'Delete an entry',
+                'View budget by department',
                 'Quit'
               ]
       }
@@ -52,7 +57,10 @@ function optionSelect() {
             addEmployee();
             break;
           case 'Update an employee role':
-            updateEmployeeRole();
+            updateEmployee('role');
+            break;
+          case 'Update employee manager':
+            updateEmployee('manager');
             break;
           default:
             break;
@@ -94,11 +102,17 @@ const choices = async (selection) => {
     case 'employee' :
       data = await db.query(chooser.employee);
       return data[0];
+    case 'manager' :
+      data = await db.query(chooser.employee);
+      const managers = data[0];
+      managers.push({value: null, name: 'None'});
+      return managers;
     default:
       break;
   }
 }
 
+// Adds a department
 const addDepartment = () => {
   inquirer
     .prompt([
@@ -113,6 +127,7 @@ const addDepartment = () => {
     }).catch((err) => console.log(err));
 } 
 
+// Adds a new role
 const addRole = async () => {
   inquirer
     .prompt([
@@ -138,9 +153,8 @@ const addRole = async () => {
     }).catch((err) => console.log(err));
 }
 
+// Adds a new employee
 const addEmployee = async () => {
-  const managers = await choices('employee');
-  managers.push({value: null, name: 'None'});
   inquirer
     .prompt([
       {
@@ -163,16 +177,16 @@ const addEmployee = async () => {
         type: 'list',
         message: 'Who is the employee\'s manager(none if no manager)?',
         name: 'manager',
-        choices: managers
+        choices: await choices('manager')
       }
     ]).then((response) => {
-      console.log(response);
       db.query(adder.employee,[response.firstName,response.lastName,response.role,response.manager])
       optionSelect();
     }).catch((err) => console.log(err));
 }
 
-const updateEmployeeRole = async () => {
+// Changes an employee's role
+const updateEmployee = async (update) => {
   inquirer
     .prompt([
       {
@@ -183,14 +197,15 @@ const updateEmployeeRole = async () => {
       },
       {
         type: 'list',
-        message: 'What role does this employee have?',
-        name: 'role',
-        choices: await choices('role')
+        message: `What ${update} does this employee have?`,
+        name: 'update',
+        choices: await choices(update)
       },
     ]).then((response) => {
-      db.query(`UPDATE employee SET role_id = ? WHERE id = ?;`, [response.role, response.employee])
+      db.query(`UPDATE employee SET ${update}_id = ? WHERE id = ?;`, [response.update, response.employee])
       optionSelect();
     })
 }
+
 
 optionSelect();
