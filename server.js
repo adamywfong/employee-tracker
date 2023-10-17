@@ -21,17 +21,17 @@ function optionSelect() {
       message: 'What would you like to do?',
       name: 'option',
       choices: ['View all departments',
-                'View all roles',
-                'View all employees',
                 'Add a department',
+                'View budget by department',
+                'View all roles',
                 'Add a role',
+                'View all employees',
                 'Add an employee',
                 'Update an employee role',
                 'Update employee manager',
                 'View employees by manager',
                 'View employees by department',
                 'Delete an entry',
-                'View budget by department',
                 'Quit'
               ]
       }
@@ -100,7 +100,7 @@ const viewDB = async (table) => {
       console.log(data[0]);
       optionSelect();
       break;
-    case 'manager':
+    case 'manager': // Shows all the employees managed by a given employee
       inquirer
         .prompt([
           {
@@ -113,9 +113,9 @@ const viewDB = async (table) => {
           data = await db.query(viewer.manager, response.manager);
           console.log(data[0]);
           optionSelect();
-        })
+        }).catch((err) => console.log(err));
       break;
-    case 'byDept':
+    case 'byDept': // Shows all the employees for a given department
       inquirer
         .prompt([
           {
@@ -128,7 +128,7 @@ const viewDB = async (table) => {
           data = await db.query(viewer.byDept, response.department);
           console.log(data[0]);
           optionSelect();
-        })
+        }).catch((err) => console.log(err));
       break;
     case 'budget':
       inquirer
@@ -143,7 +143,7 @@ const viewDB = async (table) => {
           data = await db.query(viewer.budget, response.department);
           console.log(data[0]);
           optionSelect();
-        });
+        }).catch((err) => console.log(err));
         break;
   }
 }
@@ -263,9 +263,10 @@ const updateEmployee = async (update) => {
     ]).then((response) => {
       db.query(`UPDATE employee SET ${update}_id = ? WHERE id = ?;`, [response.update, response.employee])
       optionSelect();
-    })
+    }).catch((err) => console.log(err));
 }
 
+// Prompts for a table and then deletes a requested entry from that table
 const handleDelete = async () => {
   let table;
   inquirer
@@ -290,7 +291,7 @@ const handleDelete = async () => {
           console.log(table + ' ' + res.toDelete);
       db.query(`DELETE FROM ${table} WHERE id = ?;`, res.toDelete);
       optionSelect();
-    })})
+    })}).catch((err) => console.log(err));
 }
 
 optionSelect();
