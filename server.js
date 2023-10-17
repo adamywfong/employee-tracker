@@ -87,17 +87,17 @@ const viewDB = async (table) => {
   switch (table) {
     case 'department':
       data = await db.query(viewer.department);
-      console.log(data[0]);
+      console.table(data[0]);
       optionSelect();
       break;
     case 'role':
       data = await db.query(viewer.role);
-      console.log(data[0]);
+      console.table(data[0]);
       optionSelect();
       break;
     case 'employee':
       data = await db.query(viewer.employee);
-      console.log(data[0]);
+      console.table(data[0]);
       optionSelect();
       break;
     case 'manager': // Shows all the employees managed by a given employee
@@ -111,7 +111,7 @@ const viewDB = async (table) => {
           }
         ]).then(async (response) => {
           data = await db.query(viewer.manager, response.manager);
-          console.log(data[0]);
+          console.table(data[0]);
           optionSelect();
         }).catch((err) => console.log(err));
       break;
@@ -126,7 +126,7 @@ const viewDB = async (table) => {
           }
         ]).then(async (response) => {
           data = await db.query(viewer.byDept, response.department);
-          console.log(data[0]);
+          console.table(data[0]);
           optionSelect();
         }).catch((err) => console.log(err));
       break;
@@ -141,7 +141,7 @@ const viewDB = async (table) => {
           }
         ]).then(async (response) => {
           data = await db.query(viewer.budget, response.department);
-          console.log(data[0]);
+          console.table(data[0]);
           optionSelect();
         }).catch((err) => console.log(err));
         break;

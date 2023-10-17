@@ -20,8 +20,7 @@ const viewer = {
     budget: `SELECT SUM(ALL role.salary) AS Budget 
     FROM employee
     LEFT OUTER JOIN role ON employee.role_id = role.id
-    WHERE role.department_id = ?
-    `
+    WHERE role.department_id = ?`
 }
 
 const chooser = {
