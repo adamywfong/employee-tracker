@@ -288,10 +288,10 @@ const handleDelete = async () => {
             choices: await choices(table)
           }
         ]).then((res) => {
-          console.log(table + ' ' + res.toDelete);
-      db.query(`DELETE FROM ${table} WHERE id = ?;`, res.toDelete);
-      optionSelect();
-    })}).catch((err) => console.log(err));
+          db.query(`DELETE FROM ${table} WHERE id = ?;`, res.toDelete);
+          optionSelect();
+        })
+    }).catch((err) => console.log(err));
 }
 
 optionSelect();
